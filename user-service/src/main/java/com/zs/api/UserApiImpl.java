@@ -8,6 +8,9 @@ import com.zs.vo.UserVO;
 import common.ResponseResult;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.UUID;
 
@@ -34,8 +37,18 @@ public class UserApiImpl implements UserApi {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public ResponseResult<Long> insert(Long id) {
-        return ResponseResult.ok(userService.insert(id));
+        ResponseResult<Long> result = ResponseResult.ok(userService.insert(id));
+        insert2(id + 1);
+        return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insert2(Long id) {
+        int i = 1 / 0;
+        TransactionSynchronizationManager.getCurrentTransactionName();
+        ResponseResult.ok(userService.insert(id));
     }
 
     @Override
