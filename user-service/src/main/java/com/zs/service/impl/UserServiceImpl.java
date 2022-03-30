@@ -109,6 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         boolean flag = saveOrUpdate(user);
         if (flag) {
             redisUtil.set(RedisKeyPrefixConst.USER_CACHE + id, user, getUserCacheTimeout());
+            redisUtil.convertAndSend(RedisKeyPrefixConst.TOPIC_USER, user);
             return user.getId();
         }
         return null;

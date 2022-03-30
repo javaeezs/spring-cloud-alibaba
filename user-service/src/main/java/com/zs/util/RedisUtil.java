@@ -566,4 +566,8 @@ public final class RedisUtil {
             return 0;
         }
     }
+
+    public void convertAndSend(String channel, Object message) {
+        redisTemplate.convertAndSend(channel, message);
+    }
 }

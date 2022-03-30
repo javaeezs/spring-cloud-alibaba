@@ -46,7 +46,7 @@ public class UserApiImpl implements UserApi {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void insert2(Long id) {
-        int i = 1 / 0;
+        //int i = 1 / 0;
         TransactionSynchronizationManager.getCurrentTransactionName();
         ResponseResult.ok(userService.insert(id));
     }
