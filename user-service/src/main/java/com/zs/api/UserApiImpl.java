@@ -7,6 +7,7 @@ import com.zs.util.RedisUtil;
 import com.zs.vo.UserVO;
 import common.ResponseResult;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +41,7 @@ public class UserApiImpl implements UserApi {
     @Transactional(propagation = Propagation.REQUIRED)
     public ResponseResult<Long> insert(Long id) {
         ResponseResult<Long> result = ResponseResult.ok(userService.insert(id));
-        insert2(id + 1);
+        ((UserApiImpl) AopContext.currentProxy()).insert2(id + 1);
         return result;
     }
 

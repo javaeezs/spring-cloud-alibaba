@@ -5,9 +5,13 @@ import com.zs.entity.User;
 import com.zs.mapper.UserMapper;
 import com.zs.service.UserService;
 import common.RedisKeyPrefixConst;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.zs.util.RedisUtil;
 
@@ -30,11 +34,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private RedisUtil redisUtil;
 
+    private final Logger logger = LogManager.getLogger(UserServiceImpl.class);
+
+
     public static final long USER_CACHE_TIMEOUT = 60 * 60 * 24;
     public static final String LOCK_USER_CACHE_CREATE_PREFIX = "lock:user:cache_create:";
     public static final String LOCK_USER_CACHE_UPDATE_PREFIX = "lock:user:cache_update:";
 
     @Override
+    @Cacheable(value = "user:caffeine", key = "#id")
     public User getById(Long id) {
         User user = null;
         String userCacheKey = RedisKeyPrefixConst.USER_CACHE + id;
@@ -60,6 +68,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             RReadWriteLock readWriteLock = redisson.getReadWriteLock(LOCK_USER_CACHE_UPDATE_PREFIX + id);
             readWriteLock.readLock().lock();
             try {
+                logger.info("get data from db");
                 user = baseMapper.selectById(id);
                 if (user != null) {
                     //缓存重建
@@ -80,6 +89,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     private User getUserFromCache(String key) {
+        logger.info("get data from redis");
         User user = (User) redisUtil.get(key);
         if (user != null) {
             //缓存延期
@@ -89,6 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    @CachePut(value = "user:caffeine", key = "#user.id")
     public User updateUser(User user) {
         RReadWriteLock readWriteLock = redisson.getReadWriteLock(LOCK_USER_CACHE_UPDATE_PREFIX + user.getId());
         readWriteLock.writeLock().lock();
