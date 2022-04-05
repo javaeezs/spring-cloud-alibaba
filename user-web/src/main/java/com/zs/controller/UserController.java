@@ -1,6 +1,6 @@
 package com.zs.controller;
 
-import com.zs.annotation.ExtApiIdempotent;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.zs.api.UserApi;
 import com.zs.util.RedisToken;
 import com.zs.vo.UserVO;
@@ -28,6 +28,7 @@ public class UserController {
     @Resource
     private RedisToken token;
 
+    @SentinelResource("redisToken")
     @RequestMapping("/redisToken")
     public String getRedisToken() {
         return token.getToken();

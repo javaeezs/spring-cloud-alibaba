@@ -1,0 +1,4 @@
+GET http://localhost:8020/user/redisToken
+Accept: application/json
+
+###
