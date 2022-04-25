@@ -54,10 +54,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //解决并发重建问题
         RLock lock = redisson.getLock(LOCK_USER_CACHE_CREATE_PREFIX + id);
+        //拿锁失败时会不停的重试，获取锁时具有watch dog自动延期机制，默认30秒，每隔10秒续期
         //lock.lock();
+
+        //没有watch dog，10s后自动释放
+        //lock.lock(10, TimeUnit.SECONDS);
+
         try {
             //最多等待两秒
             lock.tryLock(2, TimeUnit.SECONDS);
+
+            //尝试拿锁2秒后停止重试，返回false，没有watch dog，3秒后自动释放
+            //lock.tryLock(2, 3, TimeUnit.SECONDS);
+
             //双重检测
             user = getUserFromCache(userCacheKey);
             if (user != null) {

@@ -1,0 +1,16 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: cloud-gateway
+          uri: http://www.baidu.com
+          predicates:
+            - Path=/test/**
+          filters:
+            - StripPrefix=1
+  main:
+    allow-bean-definition-overriding: true
